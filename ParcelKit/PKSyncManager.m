@@ -265,6 +265,13 @@ NSString * const PKSyncManagerDatastoreIncomingChangesKey = @"changes";
     [managedObjects unionSet:[managedObjectContext insertedObjects]];
     [managedObjects unionSet:[managedObjectContext updatedObjects]];
     
+    NSSet *managedObjectsCopy = [managedObjects copy];
+    for (NSManagedObject *managedObject in managedObjectsCopy) {
+        if (![managedObject respondsToSelector:NSSelectorFromString(self.syncAttributeName)]) {
+            [managedObjects removeObject:managedObject];
+        }
+    }
+
     NSSet *managedObjectsWithoutSyncId = [managedObjects filteredSetUsingPredicate:[NSPredicate predicateWithFormat:@"%K == nil", self.syncAttributeName]];
     for (NSManagedObject *managedObject in managedObjectsWithoutSyncId) {
         [managedObject setPrimitiveValue:[[self class] syncID] forKey:self.syncAttributeName];
