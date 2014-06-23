@@ -31,6 +31,7 @@
 #import "PKTableMock.h"
 #import "PKRecordMock.h"
 #import "Author.h"
+#import "NonSyncableEntity.h"
 
 @interface PKSyncManager (ParcelKitTests)
 - (void)updateCoreDataWithDatastoreChanges:(NSDictionary *)changes;
@@ -443,6 +444,15 @@
     DBRecord *record = [table getRecord:@"1" error:nil];
     XCTAssertNotNil(record, @"");
     XCTAssertEqualObjects(@"Harper Lee", [record objectForKey:@"name"], @"");
+}
+
+- (void)testCoreDataInsertShouldNotUpdateDatastoreWithUnsycableObject
+{
+    [self.syncManager startObserving];
+    
+	NonSyncableEntity *object = [NSEntityDescription insertNewObjectForEntityForName:@"NonSyncableEntity" inManagedObjectContext:self.managedObjectContext];
+    [object setValue:@"Foo" forKey:@"someAttribute"];
+    XCTAssertTrue([self.managedObjectContext save:nil], @"");
 }
 
 - (void)testCoreDataInsertWithoutSyncAttributeSpecifiedShouldAddSyncAttribute
